@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobFinder Pro - Your Career Partner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<style>
+    body { font-family: 'Inter', sans-serif; }
+    .modal { transition: opacity 0.3s ease-in-out; }
+    .job-card { transition: transform 0.2s; }
+    .job-card:hover { transform: translateY(-5px); }
+</style>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <h1 class="text-2xl font-bold text-blue-600">JobFinder Pro</h1>
+                <!-- Desktop Menu -->
+                
+                <!-- Hamburger Menu for Mobile -->
+                <div class="md:hidden flex items-center">
+                    <button id="hamburgerButton" class="text-gray-600 hover:text-blue-600 text-2xl">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white shadow-md">
+            <button onclick="showSection('recommendations')" class="block w-full text-left px-4 py-2 text-gray-600 hover:bg-blue-100">Recommended</button>
+            <button onclick="showSection('jobs')" class="block w-full text-left px-4 py-2 text-gray-600 hover:bg-blue-100">All Jobs</button>
+            <button onclick="showSection('myJobs')" class="block w-full text-left px-4 py-2 text-gray-600 hover:bg-blue-100">My Jobs</button>
+            <button onclick="showSection('profile')" class="block w-full text-left px-4 py-2 text-gray-600 hover:bg-blue-100">Profile</button>
+            <button onclick="logout()" class="block w-full text-left px-4 py-2 text-gray-600 hover:bg-blue-100">Logout</button>
+        </div>
+    </nav>
+    
+
+    <!-- Auth Section -->
+    <div id="authSection" class="min-h-screen flex items-center justify-center bg-gray-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+            <h2 class="text-2xl font-bold mb-6 text-center text-blue-600" id="authTitle">Login</h2>
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="mb-4" id="nameField" style="display: none;">
+                    <label class="block text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="name" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">Submit</button>
+                <p class="mt-4 text-center">
+                    <a href="#" onclick="toggleAuth()" class="text-blue-600 hover:underline" id="authToggle">
+                        Create an account
+                    </a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="display: none;">
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Search jobs by title, company, or skills..." 
+                    class="w-full p-4 pr-12 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    oninput="searchJobs()">
+                <i class="bi bi-search absolute right-4 top-4 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile" class="bg-white p-8 rounded-lg shadow-lg" style="display: none;">
+            <h2 class="text-2xl font-bold mb-6 text-blue-600">Complete Your Profile</h2>
+            <form onsubmit="saveProfile(event)" class="max-w-2xl space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Job Title</label>
+                        <input type="text" id="jobTitle" class="w-full p-3 border rounded-lg" placeholder="e.g., Frontend Developer">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">Experience (years)</label>
+                        <input type="number" id="experience" class="w-full p-3 border rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Skills (comma separated)</label>
+                    <input type="text" id="skills" class="w-full p-3 border rounded-lg" placeholder="e.g., JavaScript, React, Node.js">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Education</label>
+                    <input type="text" id="education" class="w-full p-3 border rounded-lg" placeholder="e.g., Bachelor's in Computer Science">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Preferred Location</label>
+                    <input type="text" id="location" class="w-full p-3 border rounded-lg" placeholder="e.g., Remote, New York">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Expected Salary</label>
+                    <input type="text" id="salary" class="w-full p-3 border rounded-lg" placeholder="e.g., $80,000 - $120,000">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">
+                    Save Profile
+                </button>
+            </form>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div id="recommendations" class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">Recommended Jobs</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="recommendedJobs">
+                <!-- Recommended jobs will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Jobs Section -->
+        <div id="jobs" class="space-y-6" style="display: none;">
+            <h2 class="text-2xl font-bold text-gray-800">All Available Jobs</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="jobsContainer">
+                <!-- Jobs will be dynamically added here -->
+            </div>
+        
+            <!-- Chatbot Overlay -->
+            <div id="chatbotOverlay" class="fixed bottom-10 right-10 bg-blue-600 text-white rounded-full p-4 cursor-pointer shadow-lg" onclick="openChatbot()">
+                <i class="bi bi-chat-right-dots text-2xl"></i>
+            </div>
+        
+            <!-- Chatbot Modal -->
+            <div id="chatbotModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+                <div class="bg-white w-full md:w-96 h-96 rounded-lg p-4 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg text-gray-800">Chat with Bot</h3>
+                        <button onclick="closeChatbot()" class="text-gray-600">&times;</button>
+                    </div>
+                    <div id="chatbox" class="overflow-auto flex-1 mb-4">
+                        <!-- Chat messages will appear here -->
+                    </div>
+                    <div class="flex">
+                        <input type="text" id="userInput" class="w-full p-2 border rounded-lg" placeholder="Ask me anything..." onkeypress="sendMessage(event)">
+                        <button class="bg-blue-600 text-white p-2 ml-2 rounded-lg" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <!-- My Jobs Section -->
+        <div id="myJobs" class="space-y-6" style="display: none;">
+            <h2 class="text-2xl font-bold text-gray-800">Applied Jobs</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="myJobsContainer">
+                <!-- Applied jobs will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg max-w-md mx-4">
+            <div class="text-center">
+                <i class="bi bi-check-circle text-5xl text-green-500 mb-4"></i>
+                <h3 class="text-xl font-bold mb-4" id="modalTitle">Success!</h3>
+                <p id="modalMessage">Your application has been submitted successfully.</p>
+                <button onclick="closeModal()" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+let currentUser = null;
+let appliedJobs = new Set();
+
+// Sample job data with more variety
+const jobs = [
+    {
+        id: 1,
+        title: "Senior Frontend Developer",
+        company: "Infosys",
+        location: "Remote",
+        salary: "$90,000 - $130,000",
+        skills: ["JavaScript", "React", "TypeScript", "CSS"],
+        experience: "3-5 years",
+        posted: "2 days ago"
+    },
+    {
+        id: 2,
+        title: "Backend Engineer",
+        company: "TCS",
+        location: "New York",
+        salary: "$100,000 - $150,000",
+        skills: ["Python", "Django", "PostgreSQL", "AWS"],
+        experience: "4-6 years",
+        posted: "1 week ago"
+    },
+    {
+        id: 3,
+        title: "Full Stack Developer",
+        company: "EY Solutions",
+        location: "San Francisco",
+        salary: "$120,000 - $180,000",
+        skills: ["JavaScript", "React", "Node.js", "MongoDB"],
+        experience: "5-7 years",
+        posted: "3 days ago"
+    },
+    {
+        id: 4,
+        title: "DevOps Engineer",
+        company: "Thetha Dynamics",
+        location: "Seattle",
+        salary: "$110,000 - $160,000",
+        skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
+        experience: "3-5 years",
+        posted: "Just now"
+    },
+    {
+        id: 5,
+        title: "UI/UX Developer",
+        company: "Oracle",
+        location: "Remote",
+        salary: "$85,000 - $120,000",
+        skills: ["HTML", "CSS", "JavaScript", "Figma"],
+        experience: "2-4 years",
+        posted: "5 days ago"
+    }
+];
+
+function toggleAuth() {
+    const isLogin = document.getElementById('authTitle').textContent === 'Login';
+    document.getElementById('authTitle').textContent = isLogin ? 'Sign Up' : 'Login';
+    document.getElementById('nameField').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('authToggle').textContent = isLogin ? 'Already have an account?' : 'Create an account';
+}
+
+async function handleAuth(event) {
+    event.preventDefault();
+
+    const isLogin = document.getElementById('authTitle').textContent === 'Login';
+    const url = isLogin ? '/login' : '/signup';
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const name = isLogin ? null : document.getElementById('name').value;
+
+    const body = isLogin ? { email, password } : { email, password, name };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert(result.message);
+            if (isLogin) {
+                // Fetch and display user profile or redirect to main content
+                showMainContent();
+            } else {
+                toggleAuth();
+            }
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again later.');
+    }
+}
+
+
+function showMainContent() {
+    document.getElementById('authSection').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    renderJobs();
+}
+
+function showSection(section) {
+    ['recommendations', 'jobs', 'myJobs', 'profile'].forEach(s => {
+        document.getElementById(s).style.display = s === section ? 'block' : 'none';
+    });
+    if (section === 'myJobs') {
+        renderMyJobs();
+    } else if (section === 'recommendations' && currentUser?.profile) {
+        renderRecommendedJobs();
+    }
+}
+
+function createJobCard(job, isApplied = false) {
+    return `
+        <div class="job-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+            <h3 class="text-xl font-bold mb-2 text-gray-800">${job.title}</h3>
+            <p class="text-gray-600 mb-2"><i class="bi bi-building"></i> ${job.company}</p>
+            <p class="text-gray-600 mb-2"><i class="bi bi-geo-alt"></i> ${job.location}</p>
+            <p class="text-gray-600 mb-2"><i class="bi bi-currency-dollar"></i> ${job.salary}</p>
+            <p class="text-gray-600 mb-2"><i class="bi bi-clock"></i> ${job.experience}</p>
+            <p class="text-gray-500 text-sm mb-3"><i class="bi bi-calendar3"></i> Posted ${job.posted}</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+                ${job.skills.map(skill => `
+                    <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">${skill}</span>
+                `).join('')}
+            </div>
+            <button 
+                onclick="applyForJob(${job.id})" 
+                class="w-full ${isApplied ? 'bg-green-600' : 'bg-blue-600'} text-white p-3 rounded-lg hover:opacity-90 transition ${isApplied ? 'cursor-default' : ''}"
+                ${isApplied ? 'disabled' : ''}
+            >
+                ${isApplied ? 'Applied' : 'Apply Now'}
+            </button>
+        </div>
+    `;
+}
+
+function renderJobs() {
+    const jobsContainer = document.getElementById('jobsContainer');
+    jobsContainer.innerHTML = jobs.map(job => createJobCard(job, appliedJobs.has(job.id))).join('');
+}
+
+function renderMyJobs() {
+    const myJobsContainer = document.getElementById('myJobsContainer');
+    const appliedJobsList = jobs.filter(job => appliedJobs.has(job.id));
+    
+    myJobsContainer.innerHTML = appliedJobsList.length ? 
+        appliedJobsList.map(job => createJobCard(job, true)).join('') : 
+        '<p class="col-span-3 text-center text-gray-600 py-8">No applied jobs yet</p>';
+}
+
+async function renderRecommendedJobs() {
+    try {
+        const response = await fetch('/recommended_jobs');
+        const recommendedJobs = await response.json();
+
+        if (recommendedJobs.length > 0) {
+            const recommendedJobsContainer = document.getElementById('recommendedJobs');
+            recommendedJobsContainer.innerHTML = recommendedJobs.map(job => {
+                return `
+                    <div class="job-card">
+                        <h3>${job.title}</h3>
+                        <p>${job.description}</p>
+                        <p><strong>Skills:</strong> ${job.skills}</p>
+                        <p><strong>Location:</strong> ${job.location}</p>
+                        <p><strong>Salary:</strong> $${job.salary}</p>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            document.getElementById('recommendedJobs').innerHTML = '<p>No recommended jobs based on your profile.</p>';
+        }
+    } catch (error) {
+        console.error("Error fetching recommended jobs:", error);
+    }
+}
+
+
+
+function searchJobs() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filteredJobs = jobs.filter(job => 
+        job.title.toLowerCase().includes(searchTerm) ||
+        job.company.toLowerCase().includes(searchTerm) ||
+        job.skills.some(skill => skill.toLowerCase().includes(searchTerm))
+    );
+
+    const jobsContainer = document.getElementById('jobsContainer');
+    jobsContainer.innerHTML = filteredJobs.length ?
+        filteredJobs.map(job => createJobCard(job, appliedJobs.has(job.id))).join('') :
+        '<p class="col-span-3 text-center text-gray-600 py-8">No jobs found matching your search</p>';
+}
+
+function applyForJob(jobId) {
+    if (!appliedJobs.has(jobId)) {
+        appliedJobs.add(jobId);
+        showModal('Application Successful!', 'Your job application has been submitted successfully.');
+        renderJobs();
+        renderRecommendedJobs();
+    }
+}
+
+function showModal(title, message) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('successModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('successModal').classList.add('hidden');
+}
+
+function saveProfile(event) {
+    event.preventDefault();
+    const profile = {
+        jobTitle: document.getElementById('jobTitle').value,
+        skills: document.getElementById('skills').value,
+        experience: document.getElementById('experience').value,
+        education: document.getElementById('education').value,
+        location: document.getElementById('location').value,
+        salary: document.getElementById('salary').value
+    };
+
+    fetch('/profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(profile)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === "Profile updated successfully") {
+            showModal('Profile Updated', 'Your profile has been updated successfully!');
+            renderRecommendedJobs();
+            showSection('recommendations');
+        } else {
+            showModal('Error', data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+
+async function logout() {
+    const response = await fetch('/logout', {
+        method: 'POST',
+    });
+
+    if (response.ok) {
+        alert('Logged out successfully');
+        window.location.reload();
+    } else {
+        alert('Error logging out');
+    }
+}
+
+// Open chatbot modal
+function openChatbot() {
+        document.getElementById('chatbotModal').classList.remove('hidden');
+    }
+
+    function closeChatbot() {
+        document.getElementById('chatbotModal').classList.add('hidden');
+    }
+
+    async function sendMessage(event) {
+        if (event && event.key !== "Enter" && !event.target.matches("button")) return;
+
+        const userInput = document.getElementById('userInput').value.trim();
+        if (!userInput) return;
+
+        const chatbox = document.getElementById('chatbox');
+        chatbox.innerHTML += `<div class="mb-2 text-right text-blue-600">${userInput}</div>`;
+        document.getElementById('userInput').value = ''; // Clear input field
+        chatbox.scrollTop = chatbox.scrollHeight; // Scroll to latest message
+
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: userInput })
+            });
+
+            const data = await response.json();
+            if (data.reply) {
+                chatbox.innerHTML += `<div class="mb-2 text-left text-gray-800">${data.reply}</div>`;
+                chatbox.scrollTop = chatbox.scrollHeight;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            chatbox.innerHTML += `<div class="mb-2 text-left text-red-600">Error: Something went wrong</div>`;
+        }
+    }
+
+
+// Initialize with jobs section
+document.addEventListener('DOMContentLoaded', () => {
+    renderJobs();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburgerButton = document.getElementById('hamburgerButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburgerButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+});
+</script>
+
+
+</body>
+</html>
